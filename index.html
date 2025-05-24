@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barsa vs Real Ovoz Berish</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Montserrat', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            background-image: radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px);
+            background-size: 10px 10px;
+        }
+        .container {
+            width: 800px;
+            aspect-ratio: 1/1;
+            background: linear-gradient(180deg, #ffffff, #f0f2f5);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        .teams {
+            display: flex;
+            flex-direction: row;
+            height: 100%;
+        }
+        .team {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            transition: transform 0.2s ease;
+        }
+        .team.real {
+            background: linear-gradient(45deg, #ffffff, #ffd700);
+        }
+        .team.barsa {
+            background: linear-gradient(45deg, #a50044, #004d98);
+        }
+        .team:hover {
+            transform: scale(1.02);
+        }
+        .team img {
+            width: 150px;
+            height: 150px;
+            margin: 15px 0;
+            transition: transform 0.3s ease;
+        }
+        .team img:hover {
+            transform: scale(1.1);
+        }
+        .team h2 {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin: 10px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        .team.barsa h2 {
+            color: #ffffff;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .vote-count {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+        }
+        .team.barsa .vote-count {
+            color: #ffffff;
+        }
+        .vote-btn {
+            padding: 12px 30px;
+            font-size: 18px;
+            font-weight: 700;
+            color: white;
+            background: #00c4b4;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+        .team.barsa .vote-btn {
+            background: #ff2a44;
+        }
+        .vote-btn:hover:not(:disabled) {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+            filter: brightness(1.1);
+        }
+        .vote-btn:disabled {
+            background: #b2dffc;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        .team.barsa .vote-btn:disabled {
+            background: #ff6b81;
+        }
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                aspect-ratio: auto;
+                min-height: 600px;
+            }
+            .teams {
+                flex-direction: column;
+            }
+            .team {
+                padding: 15px;
+            }
+            .team img {
+                width: 120px;
+                height: 120px;
+            }
+            .team h2 {
+                font-size: 22px;
+            }
+            .vote-count {
+                font-size: 20px;
+            }
+            .vote-btn {
+                padding: 10px 20px;
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="teams">
+            <div class="team real">
+                <div class="vote-count" id="real-votes">Ovozlar: 0 (0%)</div>
+                <img src="https://upload.wikimedia.org/wikipedia/en/5/56/Real_Madrid_CF.svg" alt="Real Madrid Emblem">
+                <h2>Real Madrid</h2>
+                <button class="vote-btn" id="real-vote-btn" onclick="vote('real')" aria-label="Real Madrid uchun ovoz berish">Ovoz Berish</button>
+            </div>
+            <div class="team barsa">
+                <div class="vote-count" id="barsa-votes">Ovozlar: 0 (0%)</div>
+                <img src="https://upload.wikimedia.org/wikipedia/en/4/47/FC_Barcelona_%28crest%29.svg" alt="Barcelona Emblem">
+                <h2>Barcelona</h2>
+                <button class="vote-btn" id="barsa-vote-btn" onclick="vote('barsa')" aria-label="Barcelona uchun ovoz berish">Ovoz Berish</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let realVotes = parseInt(localStorage.getItem('realVotes')) || 0;
+        let barsaVotes = parseInt(localStorage.getItem('barsaVotes')) || 0;
+        let hasVoted = localStorage.getItem('hasVoted') === 'true';
+
+        function updateVoteCounts() {
+            const total = realVotes + barsaVotes;
+            const realPercent = total ? ((realVotes / total) * 100).toFixed(1) : 0;
+            const barsaPercent = total ? ((barsaVotes / total) * 100).toFixed(1) : 0;
+            document.getElementById('real-votes').textContent = `Ovozlar: ${realVotes} (${realPercent}%)`;
+            document.getElementById('barsa-votes').textContent = `Ovozlar: ${barsaVotes} (${barsaPercent}%)`;
+        }
+
+        function updateButtons() {
+            document.getElementById('real-vote-btn').disabled = hasVoted;
+            document.getElementById('barsa-vote-btn').disabled = hasVoted;
+        }
+
+        function vote(team) {
+            if (hasVoted) {
+                alert("Siz allaqachon ovoz bergansiz!");
+                return;
+            }
+            const teamName = team === 'real' ? 'Real Madrid' : 'Barcelona';
+            if (!confirm(`Siz ${teamName} uchun ovoz bermoqchimisiz?`)) return;
+
+            if (team === 'real') {
+                realVotes++;
+                localStorage.setItem('realVotes', realVotes);
+                alert("Real Madrid uchun ovoz berdingiz!");
+            } else if (team === 'barsa') {
+                barsaVotes++;
+                localStorage.setItem('barsaVotes', barsaVotes);
+                alert("Barcelona uchun ovoz berdingiz!");
+            }
+            hasVoted = true;
+            localStorage.setItem('hasVoted', 'true');
+            updateVoteCounts();
+            updateButtons();
+        }
+
+        // Add keyboard support for accessibility
+        document.querySelectorAll('.vote-btn').forEach(btn => {
+            btn.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    btn.click();
+                }
+            });
+        });
+
+        // Initialize UI
+        updateVoteCounts();
+        updateButtons();
+    </script>
+</body>
+</html>
